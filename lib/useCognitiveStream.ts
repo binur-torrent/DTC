@@ -10,8 +10,11 @@ export function useCognitiveStream() {
   const setStatus = useCognitiveStore((s) => s.setStatus);
   const setSocket = useCognitiveStore((s) => s.setSocket);
   const pushFrame = useCognitiveStore((s) => s.pushFrame);
+  const isConnectEnabled = useCognitiveStore((s) => s.isConnectEnabled);
 
   useEffect(() => {
+    if (!isConnectEnabled) return;
+
     let ws: WebSocket | null = null;
     let retry: ReturnType<typeof setTimeout> | null = null;
     let stopped = false;
@@ -46,6 +49,7 @@ export function useCognitiveStream() {
       if (retry) clearTimeout(retry);
       ws?.close();
       setSocket(null);
+      setStatus("disconnected");
     };
-  }, [setStatus, setSocket, pushFrame]);
+  }, [setStatus, setSocket, pushFrame, isConnectEnabled]);
 }

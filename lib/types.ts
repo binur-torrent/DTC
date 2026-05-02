@@ -21,6 +21,16 @@ export interface CognitiveFrame {
   datasetLabel?: string;
 }
 
+export interface MusicParams {
+  key: string;           // e.g. "C", "Am", "F#m"
+  scale: string;         // e.g. "major", "minor", "dorian"
+  chords: string[];      // 4-chord progression, e.g. ["Cmaj", "Am", "Fmaj", "Gmaj"]
+  tempo: number;         // BPM 40–160
+  instrument: string;    // "piano", "synth", "bell", "strings"
+  intensity: number;     // 0–1
+  description: string;   // AI's short description of musical mood
+}
+
 export type WSMessage =
   | { type: "heartbeat"; t: number }
   | { type: "frame"; frame: CognitiveFrame }

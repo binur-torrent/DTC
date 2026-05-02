@@ -7,10 +7,12 @@ type Status = "connecting" | "connected" | "disconnected";
 
 interface CognitiveState {
   status: Status;
+  isConnectEnabled: boolean;
   frame: CognitiveFrame | null;
   history: CognitiveFrame[];
   socket: WebSocket | null;
   setStatus: (s: Status) => void;
+  setConnectEnabled: (enabled: boolean) => void;
   setSocket: (ws: WebSocket | null) => void;
   pushFrame: (f: CognitiveFrame) => void;
   sendMessage: (msg: WSMessage) => void;
@@ -19,11 +21,13 @@ interface CognitiveState {
 const HISTORY_SIZE = 180;
 
 export const useCognitiveStore = create<CognitiveState>((set, get) => ({
-  status: "connecting",
+  status: "disconnected",
+  isConnectEnabled: false,
   frame: null,
   history: [],
   socket: null,
   setStatus: (status) => set({ status }),
+  setConnectEnabled: (enabled) => set({ isConnectEnabled: enabled }),
   setSocket: (socket) => set({ socket }),
   pushFrame: (f) =>
     set((s) => {
