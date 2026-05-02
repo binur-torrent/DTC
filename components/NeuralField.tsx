@@ -160,9 +160,8 @@ function ParticleField() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          array={positions}
+          args={[positions, 3]}
           count={PARTICLE_COUNT}
-          itemSize={3}
         />
       </bufferGeometry>
       <shaderMaterial
