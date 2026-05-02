@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { useCognitiveStore } from "@/lib/cognitiveStore";
-import type { DisplayParams } from "./ParameterPanel";
 
 /**
  * Generates a synthetic FFT spectrum from alpha/beta/theta values.
@@ -147,25 +146,32 @@ export function FFTChart({ params }: Props) {
       ctx.textAlign = "right";
       ctx.fillText("● AF3", padL + cw, padT + ch + 26);
 
-      // Get current frame data
-      const frame = useCognitiveStore.getState().frame;
-      const alpha = frame?.alpha ?? 0.5;
-      const beta = frame?.beta ?? 0.3;
-      const theta = frame?.theta ?? 0.4;
+      // ── Gate: freeze at flat baseline when session not started ──
+      const sessionStartTime = useCognitiveStore.getState().sessionStartTime;
 
-      // Generate or use real spectrum
+      // Get current frame data
+      const frame = sessionStartTime ? useCognitiveStore.getState().frame : null;
+      const alpha = frame?.alpha ?? 0;
+      const beta = frame?.beta ?? 0;
+      const theta = frame?.theta ?? 0;
+
+      // Generate or use real spectrum (flat line if no session)
       let spectrum: number[];
       let numPoints = 256;
 
-      if (frame?.fft && frame.fft.length > 0) {
+      if (!sessionStartTime) {
+        // Flat neutral line at mid-level
+        const midVal = amin + (amax - amin) * 0.15;
+        spectrum = Array(numPoints).fill(midVal);
+      } else if (frame?.fft && frame.fft.length > 0) {
         spectrum = frame.fft.map(v => amin + v * (amax - amin) * 0.8 + 10);
         numPoints = spectrum.length;
       } else {
         spectrum = generateSpectrum(alpha, beta, theta, fmin, fmax, numPoints);
       }
 
-      ctx.strokeStyle = frame?.fft ? "#14b8a6" : "#555";
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = (sessionStartTime && frame?.fft) ? "#14b8a6" : "#bbb";
+      ctx.lineWidth = sessionStartTime ? 1.2 : 1;
       ctx.beginPath();
       for (let i = 0; i < numPoints; i++) {
         const x = padL + (i / (numPoints - 1)) * cw;

@@ -8,7 +8,6 @@ import { ParameterPanel, type DisplayParams } from "@/components/ParameterPanel"
 import { HardwareStatus } from "@/components/HardwareStatus";
 import { CaseStudyPanel } from "@/components/CaseStudyPanel";
 import { MusicPanel } from "@/components/MusicPanel";
-import { WaveVisualizer } from "@/components/WaveVisualizer";
 import { FFTChart } from "@/components/FFTChart";
 import { BandPowerChart } from "@/components/BandPowerChart";
 import { useCognitiveStore } from "@/lib/cognitiveStore";
@@ -70,9 +69,6 @@ export default function Home() {
           {/* ── Music View: AI Composer ── */}
           {activeView === "music" && <MusicPanel />}
 
-          {/* ── Immersive View: Wave Oscilloscope ── */}
-          {activeView === "immersive" && <WaveVisualizer />}
-
           {/* ── Subject View: Clinical Case Studies ── */}
           {activeView === "subject" && (
             <>
@@ -88,7 +84,7 @@ export default function Home() {
           {activeView === "hardware" && <HardwareStatus />}
 
           {/* ── Placeholder for other views ── */}
-          {activeView !== "signals" && activeView !== "hardware" && activeView !== "music" && activeView !== "subject" && activeView !== "immersive" && (
+          {activeView !== "signals" && activeView !== "hardware" && activeView !== "music" && activeView !== "subject" && (
             <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
               {activeView.charAt(0).toUpperCase() + activeView.slice(1)} view — coming soon
             </div>

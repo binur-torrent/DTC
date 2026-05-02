@@ -137,25 +137,24 @@ export function WaveVisualizer() {
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 bg-[#0a0f18] relative">
-      <div className="absolute top-6 left-6 z-10">
-        <h2 className="text-white/80 font-bold tracking-widest text-sm uppercase flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          Immersive Wave Analysis
+    <div className="flex flex-col h-[300px] w-full bg-[#0a0f18] relative rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      <div className="absolute top-4 left-4 z-10">
+        <h2 className="text-white/80 font-bold tracking-widest text-[10px] uppercase flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          Neural Waveform
         </h2>
-        <p className="text-white/40 text-xs mt-1 font-mono">NEURAL_OSC // REAL-TIME</p>
       </div>
       
-      <div className="absolute top-6 right-6 z-10 flex gap-4 text-right">
+      <div className="absolute top-4 right-4 z-10 flex gap-4 text-right">
         <div>
-          <div className="text-white/40 text-[10px] uppercase font-bold">Focus Resonance</div>
-          <div className="text-cyan-400 font-mono text-xl font-bold">
+          <div className="text-white/40 text-[8px] uppercase font-bold">Focus</div>
+          <div className="text-cyan-400 font-mono text-sm font-bold">
              {((useCognitiveStore.getState().frame?.focus || 0) * 100).toFixed(0)}%
           </div>
         </div>
         <div>
-          <div className="text-white/40 text-[10px] uppercase font-bold">Stress Amplitude</div>
-          <div className="text-white font-mono text-xl font-bold">
+          <div className="text-white/40 text-[8px] uppercase font-bold">Stress</div>
+          <div className="text-white font-mono text-sm font-bold">
              {((useCognitiveStore.getState().frame?.stress || 0) * 100).toFixed(0)}%
           </div>
         </div>

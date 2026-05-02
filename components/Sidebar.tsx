@@ -1,10 +1,9 @@
 "use client";
 
-export type ViewId = "signals" | "hardware" | "music" | "immersive" | "analysis" | "subject" | "grid" | "settings";
+export type ViewId = "signals" | "hardware" | "music" | "analysis" | "subject" | "grid" | "settings";
 
 const VIEWS: { id: ViewId; path: string; label: string }[] = [
   { id: "signals",  label: "Signals",  path: "M2 12h4l3-9 4 18 3-9h4" },
-  { id: "immersive",label: "Immersive",path: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2 12c0 5.523 4.477 10 10 10s10-4.477 10-10S17.523 2 12 2 2 6.477 2 12z" },
   { id: "music",    label: "Music",    path: "M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" },
   { id: "hardware", label: "Hardware", path: "M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v12M6 12h12" },
   { id: "analysis", label: "Analysis", path: "M3 3h18v18H3zM3 15l5-5 4 4 8-8" },

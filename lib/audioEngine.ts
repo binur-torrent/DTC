@@ -75,6 +75,7 @@ export class AudioEngine {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private compressor: DynamicsCompressorNode | null = null;
+  private analyser: AnalyserNode | null = null;
 
   // Arpeggiator state
   private arpInterval: ReturnType<typeof setInterval> | null = null;
@@ -106,11 +107,17 @@ export class AudioEngine {
     this.ctx = new AudioContext();
     this.onChordChange = onChordChange || null;
 
-    // Master chain: compressor → gain → destination
+    // Master chain: compressor → gain → analyser → destination
     this.compressor = this.ctx.createDynamicsCompressor();
     this.compressor.threshold.value = -24;
     this.compressor.ratio.value = 4;
-    this.compressor.connect(this.ctx.destination);
+
+    this.analyser = this.ctx.createAnalyser();
+    this.analyser.fftSize = 256;
+    this.analyser.smoothingTimeConstant = 0.8;
+
+    this.compressor.connect(this.analyser);
+    this.analyser.connect(this.ctx.destination);
 
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.value = 0.35;
@@ -323,6 +330,10 @@ export class AudioEngine {
 
   isRunning(): boolean {
     return this.ctx !== null && this.ctx.state === "running";
+  }
+
+  getAnalyser(): AnalyserNode | null {
+    return this.analyser;
   }
 }
 

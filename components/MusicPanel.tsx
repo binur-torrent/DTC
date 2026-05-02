@@ -3,6 +3,7 @@
 import { useCognitiveStore } from "@/lib/cognitiveStore";
 import { useMusicStore } from "@/lib/musicStore";
 import { useComposer } from "@/lib/useComposer";
+import { AudioSpectrum } from "./AudioSpectrum";
 
 export function MusicPanel() {
   useComposer();
@@ -69,9 +70,12 @@ export function MusicPanel() {
         )}
       </div>
 
+      {/* Real audio spectrum — reads directly from Web Audio AnalyserNode */}
+      <AudioSpectrum />
+
       {!music ? (
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-          {isPlaying ? "Waiting for AI response..." : "Press Play to start the AI music composer"}
+        <div className="flex items-center justify-center text-gray-400 text-sm py-6">
+          {isPlaying ? "Waiting for AI response…" : "Press Play to start the AI music composer"}
         </div>
       ) : (
         <>
@@ -145,49 +149,6 @@ export function MusicPanel() {
               AI Musical Interpretation
             </span>
             <p className="text-sm text-gray-700 italic">&ldquo;{music.description}&rdquo;</p>
-          </div>
-
-          {/* Pipeline Visualization */}
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <span className="text-[10px] uppercase text-gray-400 font-bold block mb-3">
-              Pipeline
-            </span>
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-blue-600">🧠</span>
-                </div>
-                <span>EEG Data</span>
-              </div>
-              <span className="text-gray-300">→</span>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
-                  <span className="text-teal-600">📡</span>
-                </div>
-                <span>WebSocket</span>
-              </div>
-              <span className="text-gray-300">→</span>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <span className="text-purple-600">🤖</span>
-                </div>
-                <span>AI Model</span>
-              </div>
-              <span className="text-gray-300">→</span>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                  <span className="text-amber-600">🎵</span>
-                </div>
-                <span>Audio</span>
-              </div>
-              <span className="text-gray-300">→</span>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <span className="text-green-600">🔊</span>
-                </div>
-                <span>Speaker</span>
-              </div>
-            </div>
           </div>
         </>
       )}

@@ -47,8 +47,9 @@ export function BandPowerChart({ params }: Props) {
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, w, h);
 
-      // Get current data
-      const frame = useCognitiveStore.getState().frame;
+      // Gate: zero out data when session hasn't started
+      const sessionStartTime = useCognitiveStore.getState().sessionStartTime;
+      const frame = sessionStartTime ? useCognitiveStore.getState().frame : null;
 
       // Target band powers (scaled to reasonable dB-like values)
       const targets = [
@@ -107,7 +108,7 @@ export function BandPowerChart({ params }: Props) {
         const y = padT + ch - barH;
 
         // Bar
-        ctx.fillStyle = "#555";
+        ctx.fillStyle = sessionStartTime ? "#555" : "#ddd";
         ctx.fillRect(x, y, barWidth, barH);
 
         // Label
