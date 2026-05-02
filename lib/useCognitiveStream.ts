@@ -8,6 +8,7 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:3940";
 
 export function useCognitiveStream() {
   const setStatus = useCognitiveStore((s) => s.setStatus);
+  const setSocket = useCognitiveStore((s) => s.setSocket);
   const pushFrame = useCognitiveStore((s) => s.pushFrame);
 
   useEffect(() => {
@@ -19,9 +20,13 @@ export function useCognitiveStream() {
       if (stopped) return;
       setStatus("connecting");
       ws = new WebSocket(WS_URL);
-      ws.onopen = () => setStatus("connected");
+      ws.onopen = () => {
+        setStatus("connected");
+        setSocket(ws);
+      };
       ws.onclose = () => {
         setStatus("disconnected");
+        setSocket(null);
         if (!stopped) retry = setTimeout(connect, 800);
       };
       ws.onerror = () => ws?.close();
@@ -40,6 +45,7 @@ export function useCognitiveStream() {
       stopped = true;
       if (retry) clearTimeout(retry);
       ws?.close();
+      setSocket(null);
     };
-  }, [setStatus, pushFrame]);
+  }, [setStatus, setSocket, pushFrame]);
 }

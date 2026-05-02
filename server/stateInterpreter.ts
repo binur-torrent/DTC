@@ -24,22 +24,24 @@ const BPM_CALM_GAIN = 15;
 const BPM_EMA_ALPHA = 0.03;
 
 export class StateInterpreter {
-  private prev: { alpha: number; beta: number; theta: number } | null = null;
+  private prev: { alpha: number; beta: number; theta: number; gamma: number; delta: number } | null = null;
   private loadEMA = 0.45;
   private intensityEMA = 0.30;
   private bpmEMA = 72;
 
-  process(nowMs: number, bands: BandsOut): CognitiveFrame {
-    const { alpha, beta, theta, phase } = bands;
+  process(nowMs: number, bands: any): CognitiveFrame {
+    const { alpha, beta, theta, gamma = 0, delta = 0, fft = [], phase } = bands;
 
     let deriv = 0;
     if (this.prev) {
       deriv =
         Math.abs(alpha - this.prev.alpha) +
         Math.abs(beta - this.prev.beta) +
-        Math.abs(theta - this.prev.theta);
+        Math.abs(theta - this.prev.theta) +
+        Math.abs(gamma - this.prev.gamma) +
+        Math.abs(delta - this.prev.delta);
     }
-    this.prev = { alpha, beta, theta };
+    this.prev = { alpha, beta, theta, gamma, delta };
     this.intensityEMA = ema(
       this.intensityEMA,
       clamp01(deriv * INTENSITY_GAIN),
@@ -65,6 +67,9 @@ export class StateInterpreter {
       alpha,
       beta,
       theta,
+      gamma,
+      delta,
+      fft,
       focus,
       stress,
       calmness,
