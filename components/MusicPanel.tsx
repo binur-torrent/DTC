@@ -12,10 +12,6 @@ export function MusicPanel() {
   const activeChord = useMusicStore((s) => s.activeChordIndex);
   const togglePlayback = useMusicStore((s) => s.togglePlayback);
 
-  const sendMessage = useCognitiveStore((s) => s.sendMessage);
-  const currentFrame = useCognitiveStore((s) => s.frame);
-  const dataMode = currentFrame?.datasetLabel || "SIM";
-
   return (
     <div className="flex flex-col flex-1 p-4 gap-4 min-h-0 overflow-y-auto">
       {/* Header & Controls */}
@@ -49,28 +45,6 @@ export function MusicPanel() {
               </>
             )}
           </button>
-        </div>
-
-        {/* Data Source Selector */}
-        <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <span className="text-[10px] uppercase text-gray-500 font-bold">Data Source:</span>
-          <select
-            className="text-xs border border-gray-200 rounded p-1.5 text-gray-700 bg-white font-medium focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-            value={dataMode}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === "SIM") {
-                sendMessage({ type: "set_mode", mode: "sim" });
-              } else {
-                sendMessage({ type: "set_mode", mode: "dataset", label: val });
-              }
-            }}
-          >
-            <option value="SIM">Live Simulation (Procedural)</option>
-            <option value="POSITIVE">emotions.csv (Positive Emotion)</option>
-            <option value="NEGATIVE">emotions.csv (Negative Emotion)</option>
-            <option value="NEUTRAL">emotions.csv (Neutral Baseline)</option>
-          </select>
         </div>
       </div>
 

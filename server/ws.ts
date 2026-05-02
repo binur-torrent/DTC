@@ -29,14 +29,28 @@ setInterval(() => {
   } else {
     const frame = dataset.tick();
     if (frame) {
+      // Amplify bands based on emotion to make the visualizer react vividly
+      let alpha = frame.alpha;
+      let beta = frame.beta;
+      let theta = frame.theta;
+      
+      if (frame.label === "NEGATIVE") {
+        beta = Math.min(1, beta * 2.5); // High stress
+        alpha = Math.max(0, alpha * 0.2); // Low calm
+      } else if (frame.label === "POSITIVE") {
+        theta = Math.min(1, theta * 2.0); // High focus
+        beta = Math.max(0, beta * 0.4); // Low stress
+        alpha = Math.min(1, alpha * 1.5); // High calm
+      }
+
       bands = {
-        alpha: frame.alpha,
-        beta: frame.beta,
-        theta: frame.theta,
+        alpha,
+        beta,
+        theta,
         gamma: frame.gamma,
         delta: frame.delta,
         fft: frame.fft,
-        phase: "calm" // Default phase for dataset
+        phase: frame.label === "NEGATIVE" ? "overload" : "calm"
       };
       label = frame.label;
     } else {

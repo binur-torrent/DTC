@@ -8,6 +8,8 @@ export function Header() {
   const sessionStartTime = useCognitiveStore((s) => s.sessionStartTime);
   const startSession = useCognitiveStore((s) => s.startSession);
   const endSession = useCognitiveStore((s) => s.endSession);
+  const sendMessage = useCognitiveStore((s) => s.sendMessage);
+  const dataMode = frame?.datasetLabel || "SIM";
 
   const getMoodColor = (mood?: string) => {
     switch (mood) {
@@ -66,6 +68,27 @@ export function Header() {
             )}
           </button>
         )}
+
+        <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+          <span className="text-[10px] uppercase text-gray-500 font-bold px-1">Source:</span>
+          <select
+            className="text-[10px] border border-gray-200 rounded p-1 text-gray-700 bg-white font-medium focus:outline-none focus:border-teal-500"
+            value={dataMode}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "SIM") {
+                sendMessage({ type: "set_mode", mode: "sim" });
+              } else {
+                sendMessage({ type: "set_mode", mode: "dataset", label: val });
+              }
+            }}
+          >
+            <option value="SIM">Live Simulation</option>
+            <option value="POSITIVE">Positive Emotion</option>
+            <option value="NEGATIVE">Negative Emotion</option>
+            <option value="NEUTRAL">Neutral Baseline</option>
+          </select>
+        </div>
         
         <div className="flex items-center gap-3 border-l pl-4 border-gray-100">
           <span className={`w-2.5 h-2.5 rounded-full ${
