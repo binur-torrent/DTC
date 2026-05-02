@@ -20,6 +20,7 @@ interface CognitiveState {
   startSession: () => void;
   endSession: () => Promise<void>;
   sendMessage: (msg: WSMessage) => void;
+  clearHistory: () => void;
 }
 
 const HISTORY_SIZE = 180;
@@ -73,5 +74,6 @@ export const useCognitiveStore = create<CognitiveState>((set, get) => ({
     if (socket && socket.readyState === socket.OPEN) {
       socket.send(JSON.stringify(msg));
     }
-  }
+  },
+  clearHistory: () => set({ history: [], sessionHistory: [] }),
 }));

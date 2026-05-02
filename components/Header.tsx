@@ -9,6 +9,7 @@ export function Header() {
   const startSession = useCognitiveStore((s) => s.startSession);
   const endSession = useCognitiveStore((s) => s.endSession);
   const sendMessage = useCognitiveStore((s) => s.sendMessage);
+  const clearHistory = useCognitiveStore((s) => s.clearHistory);
   const dataMode = frame?.datasetLabel || "SIM";
 
   const getMoodColor = (mood?: string) => {
@@ -76,6 +77,7 @@ export function Header() {
             value={dataMode}
             onChange={(e) => {
               const val = e.target.value;
+              clearHistory();
               if (val === "SIM") {
                 sendMessage({ type: "set_mode", mode: "sim" });
               } else {

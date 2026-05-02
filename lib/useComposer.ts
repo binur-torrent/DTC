@@ -28,19 +28,24 @@ export function useComposer() {
     };
   }, [isPlaying, setActiveChordIndex]);
 
+  // Track the last label to detect changes
+  const lastLabelRef = useRef<string | null>(null);
+  const datasetLabel = useCognitiveStore((s) => s.frame?.datasetLabel);
+
   // Poll the AI composer API
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    const tick = async () => {
+    const tick = async (force = false) => {
       if (stopped) return;
 
       const history = useCognitiveStore.getState().history;
       const playing = useMusicStore.getState().isPlaying;
 
-      if (history.length < 5 || !playing) {
-        timer = setTimeout(tick, 1000);
+      // When forcing (on mode change), we allow smaller history
+      if (!playing || (!force && history.length < 5)) {
+        timer = setTimeout(() => tick(), 1000);
         return;
       }
 
@@ -72,13 +77,20 @@ export function useComposer() {
         // network error — leave previous music running
       }
 
-      if (!stopped) timer = setTimeout(tick, COMPOSE_INTERVAL_MS);
+      if (!stopped) timer = setTimeout(() => tick(), COMPOSE_INTERVAL_MS);
     };
 
-    timer = setTimeout(tick, FIRST_DELAY_MS);
+    // Trigger immediate tick if the label changed
+    if (datasetLabel !== lastLabelRef.current) {
+      lastLabelRef.current = datasetLabel || "SIM";
+      tick(true); 
+    } else {
+      timer = setTimeout(() => tick(), FIRST_DELAY_MS);
+    }
+
     return () => {
       stopped = true;
       if (timer) clearTimeout(timer);
     };
-  }, [setMusic]);
+  }, [setMusic, datasetLabel]);
 }

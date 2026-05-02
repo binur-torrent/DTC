@@ -3,9 +3,9 @@ import type { CognitiveFrame, MusicParams, Mood } from "@/lib/types";
 
 export const runtime = "nodejs";
 
-const SYSTEM_PROMPT = `You are a real-time music composer AI for a brain-computer interface called Wavy.
+const SYSTEM_PROMPT = `You are a real-time ambient music composer AI for a brain-computer interface called Wavy.
 
-You receive brainwave-derived cognitive metrics (focus, stress, calmness, cognitive load, mood, emotion label) and must select musical parameters that reflect and respond to the user's mental state.
+You receive brainwave-derived cognitive metrics and must select musical parameters that reflect the user's mental state through textured, soulful, and sentimental soundscapes.
 
 Rules:
 - Return ONLY valid JSON, no markdown, no explanation.
@@ -13,48 +13,48 @@ Rules:
 - "key": a musical key like "C", "D", "Am", "F#m"
 - "scale": one of "major", "minor", "dorian", "mixolydian", "pentatonic"
 - "chords": an array of exactly 4 chord names (e.g. ["Cmaj7", "Am7", "Fmaj7", "G7"])
-- "tempo": integer BPM between 50 and 150
-- "instrument": one of "piano", "synth", "bell", "strings", "pluck"
+- "tempo": integer BPM between 40 and 90 (Keep it slow and ambient)
+- "instrument": one of "piano", "synth", "bell", "strings"
 - "intensity": float 0.0 to 1.0
 - "description": one short sentence about the musical mood (max 12 words)
 
 Musical mapping guidelines:
-- High calmness + low stress → slow tempo, major/dorian scale, warm tones, low intensity
-- High focus → moderate tempo, clean tones, steady rhythm, medium intensity
-- High stress / overloaded → faster tempo, minor scale, higher intensity, tense chords (diminished, minor7)
-- Drifting → slow, pentatonic, gentle arpeggios, very low intensity
-- POSITIVE emotion label → brighter keys (C, G, D major), uplifting progressions
-- NEGATIVE emotion label → darker keys (Am, Em, Dm), minor progressions
-- NEUTRAL → balanced, dorian or mixolydian modes
+- High calmness + low stress → slow tempo (40-60 BPM), major/dorian, warm textures, low intensity
+- High focus → moderate tempo (70-80 BPM), clean piano/bell, steady but soft, medium intensity
+- High stress / overloaded → slow tempo, minor scale, slightly thicker synth textures, tense but soulful chords
+- Drifting → very slow, pentatonic, floating bells, very low intensity
+- POSITIVE emotion label → brighter keys (C, G, D major), uplifting soulful progressions
+- NEGATIVE emotion label → darker keys (Am, Em, Dm), sentimental minor progressions
+- NEUTRAL → balanced, dreamy dorian or mixolydian modes
 
-Always vary your chord progressions. Never repeat the same 4 chords twice in a row.`;
+Always favor lush, evolving chords (maj7, min7, 9ths). Avoid anything rhythmic, fast, or "crazy".`;
 
 // Fallback presets keyed by mood — used when API key is missing or call fails
 const FALLBACK: Record<Mood, MusicParams> = {
   calm: {
     key: "C", scale: "major", chords: ["Cmaj7", "Am7", "Fmaj7", "G7"],
-    tempo: 72, instrument: "piano", intensity: 0.3,
-    description: "Gentle major progressions, breath-like pacing",
+    tempo: 55, instrument: "piano", intensity: 0.25,
+    description: "Deeply calm major textures, breathing and slow",
   },
   focused: {
-    key: "D", scale: "dorian", chords: ["Dm7", "G7", "Cmaj7", "Am7"],
-    tempo: 95, instrument: "pluck", intensity: 0.5,
-    description: "Steady dorian drive, focused and clear",
+    key: "D", scale: "dorian", chords: ["Dm9", "G13", "Cmaj7", "Am7"],
+    tempo: 75, instrument: "piano", intensity: 0.45,
+    description: "Clean, steady focus with soulful dorian textures",
   },
   engaged: {
-    key: "G", scale: "mixolydian", chords: ["Gmaj", "F", "Am", "C"],
-    tempo: 105, instrument: "synth", intensity: 0.55,
-    description: "Active mixolydian groove, alert and balanced",
+    key: "G", scale: "mixolydian", chords: ["Gmaj9", "Fmaj7", "Am7", "Cmaj7"],
+    tempo: 82, instrument: "synth", intensity: 0.5,
+    description: "Warm mixolydian clouds, active but grounded",
   },
   overloaded: {
-    key: "Am", scale: "minor", chords: ["Am7", "Dm7", "E7", "Bdim"],
-    tempo: 130, instrument: "strings", intensity: 0.85,
-    description: "Tense minor build, pressure rising fast",
+    key: "Am", scale: "minor", chords: ["Am9", "Dm7", "E7alt", "Fmaj7"],
+    tempo: 65, instrument: "strings", intensity: 0.7,
+    description: "Heavy minor clouds, slow and sentimental",
   },
   drifting: {
-    key: "Em", scale: "pentatonic", chords: ["Em7", "Am7", "Cmaj7", "Bm7"],
-    tempo: 60, instrument: "bell", intensity: 0.2,
-    description: "Floating pentatonic drift, soft and open",
+    key: "Em", scale: "pentatonic", chords: ["Em9", "Am7", "Cmaj7", "Bm7"],
+    tempo: 45, instrument: "bell", intensity: 0.15,
+    description: "Floating in air, ethereal pentatonic drift",
   },
 };
 
@@ -121,9 +121,9 @@ export async function POST(req: Request) {
       throw new Error("Invalid music params shape");
     }
 
-    // Ensure tempo is reasonable
-    music.tempo = Math.max(50, Math.min(150, music.tempo || 80));
-    music.intensity = Math.max(0, Math.min(1, music.intensity || 0.5));
+    // Ensure tempo is reasonable for ambient music
+    music.tempo = Math.max(40, Math.min(95, music.tempo || 70));
+    music.intensity = Math.max(0, Math.min(1, music.intensity || 0.4));
 
     lastChords = music.chords;
     return NextResponse.json({ music, source: "ai" });
@@ -141,6 +141,8 @@ function avg(nums: number[]): number {
 
 function summarize(win: CognitiveFrame[]): string {
   const last = win[win.length - 1];
+  if (!last) return "User state is initializing.";
+
   const half = Math.max(1, Math.floor(win.length / 2));
   const earlier = win.slice(0, half);
   const recent = win.slice(half);

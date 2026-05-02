@@ -1,8 +1,8 @@
 /**
  * audioEngine.ts — Web Audio API synthesizer for Wavy
  *
- * Rhythmic/melodic style: arpeggiator + bass + pad, tempo-synced.
- * All transitions are smoothed to avoid clicks.
+ * Ambient/Soulful style: slow drifting melody + deep sine pads, tempo-synced.
+ * Focused on emotional depth and smooth transitions.
  */
 
 import type { MusicParams } from "./types";
@@ -77,13 +77,13 @@ export class AudioEngine {
   private compressor: DynamicsCompressorNode | null = null;
   private analyser: AnalyserNode | null = null;
 
-  // Arpeggiator state
-  private arpInterval: ReturnType<typeof setInterval> | null = null;
-  private arpOsc: OscillatorNode | null = null;
-  private arpGain: GainNode | null = null;
-  private arpFilter: BiquadFilterNode | null = null;
-  private arpNotes: number[] = [];
-  private arpIndex = 0;
+  // Melody state (replacing Arpeggiator with slow drifting melody)
+  private melodyInterval: ReturnType<typeof setInterval> | null = null;
+  private melodyOsc: OscillatorNode | null = null;
+  private melodyGain: GainNode | null = null;
+  private melodyFilter: BiquadFilterNode | null = null;
+  private melodyNotes: number[] = [];
+  private melodyIndex = 0;
 
   // Bass state
   private bassOsc: OscillatorNode | null = null;
@@ -123,44 +123,44 @@ export class AudioEngine {
     this.masterGain.gain.value = 0.35;
     this.masterGain.connect(this.compressor);
 
-    this.setupArp();
+    this.setupMelody();
     this.setupBass();
     this.setupPad();
     this.startSequencer();
   }
 
   stop() {
-    if (this.arpInterval) clearInterval(this.arpInterval);
+    if (this.melodyInterval) clearInterval(this.melodyInterval);
     if (this.chordChangeInterval) clearInterval(this.chordChangeInterval);
-    this.arpOsc?.stop();
+    this.melodyOsc?.stop();
     this.bassOsc?.stop();
     this.padOscs.forEach((o) => o.stop());
     this.ctx?.close();
     this.ctx = null;
-    this.arpInterval = null;
+    this.melodyInterval = null;
     this.chordChangeInterval = null;
-    this.arpOsc = null;
+    this.melodyOsc = null;
     this.bassOsc = null;
     this.padOscs = [];
   }
 
-  private setupArp() {
+  private setupMelody() {
     if (!this.ctx || !this.masterGain) return;
-    this.arpFilter = this.ctx.createBiquadFilter();
-    this.arpFilter.type = "lowpass";
-    this.arpFilter.frequency.value = 2000;
-    this.arpFilter.Q.value = 2;
+    this.melodyFilter = this.ctx.createBiquadFilter();
+    this.melodyFilter.type = "lowpass";
+    this.melodyFilter.frequency.value = 1200;
+    this.melodyFilter.Q.value = 1.5;
 
-    this.arpGain = this.ctx.createGain();
-    this.arpGain.gain.value = 0.18;
-    this.arpGain.connect(this.arpFilter);
-    this.arpFilter.connect(this.masterGain);
+    this.melodyGain = this.ctx.createGain();
+    this.melodyGain.gain.value = 0.12;
+    this.melodyGain.connect(this.melodyFilter);
+    this.melodyFilter.connect(this.masterGain);
 
-    this.arpOsc = this.ctx.createOscillator();
-    this.arpOsc.type = "triangle";
-    this.arpOsc.frequency.value = 440;
-    this.arpOsc.connect(this.arpGain);
-    this.arpOsc.start();
+    this.melodyOsc = this.ctx.createOscillator();
+    this.melodyOsc.type = "triangle";
+    this.melodyOsc.frequency.value = 440;
+    this.melodyOsc.connect(this.melodyGain);
+    this.melodyOsc.start();
   }
 
   private setupBass() {
@@ -189,11 +189,11 @@ export class AudioEngine {
     this.padGain.connect(this.padFilter);
     this.padFilter.connect(this.masterGain);
 
-    // 3-voice pad
+    // 3-voice pad (using sine waves for ambient texture)
     for (let i = 0; i < 3; i++) {
       const osc = this.ctx.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.value = 261.63 + i * 0.8; // slight detune
+      osc.type = "sine";
+      osc.frequency.value = 261.63 + i * 1.2; // slight detune
       osc.connect(this.padGain);
       osc.start();
       this.padOscs.push(osc);
@@ -201,21 +201,21 @@ export class AudioEngine {
   }
 
   private startSequencer() {
-    // Arpeggiator: step through notes at tempo-synced rate (16th notes)
-    this.scheduleArp();
-    // Chord changes: every 4 beats
+    // Drifting melody: quarter notes for a slower feel
+    this.scheduleMelody();
+    // Chord changes: every 8 bars for a more sentimental, slow evolution
     this.scheduleChordChange();
   }
 
-  private scheduleArp() {
-    if (this.arpInterval) clearInterval(this.arpInterval);
-    const sixteenthMs = (60000 / this.currentTempo) / 4;
-    this.arpInterval = setInterval(() => this.arpTick(), sixteenthMs);
+  private scheduleMelody() {
+    if (this.melodyInterval) clearInterval(this.melodyInterval);
+    const quarterNoteMs = (60000 / this.currentTempo);
+    this.melodyInterval = setInterval(() => this.melodyTick(), quarterNoteMs);
   }
 
   private scheduleChordChange() {
     if (this.chordChangeInterval) clearInterval(this.chordChangeInterval);
-    const barMs = (60000 / this.currentTempo) * 4; // 4 beats per bar
+    const barMs = (60000 / this.currentTempo) * 8; // Longer transitions
     this.chordChangeInterval = setInterval(() => {
       this.currentChordIdx = (this.currentChordIdx + 1) % this.currentChords.length;
       this.updateVoicesToCurrentChord();
@@ -223,24 +223,22 @@ export class AudioEngine {
     }, barMs);
   }
 
-  private arpTick() {
-    if (!this.ctx || !this.arpOsc || !this.arpGain) return;
+  private melodyTick() {
+    if (!this.ctx || !this.melodyOsc || !this.melodyGain) return;
     const now = this.ctx.currentTime;
 
-    if (this.arpNotes.length === 0) return;
+    if (this.melodyNotes.length === 0) return;
 
-    // Cycle through arp notes up and down
-    const totalSteps = this.arpNotes.length * 2 - 2;
-    const step = this.arpIndex % (totalSteps || 1);
-    const idx = step < this.arpNotes.length ? step : totalSteps - step;
-    const freq = this.arpNotes[Math.min(idx, this.arpNotes.length - 1)];
+    // Drifting selection: slight randomness for soulful feel
+    const idx = Math.floor(Math.random() * this.melodyNotes.length);
+    const freq = this.melodyNotes[idx];
 
-    // Plucky envelope: quick attack, medium decay
-    this.arpOsc.frequency.setTargetAtTime(freq, now, 0.005);
-    this.arpGain.gain.setValueAtTime(0.2 * this.currentIntensity, now);
-    this.arpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    // Soft envelope: slow attack, long release
+    this.melodyOsc.frequency.setTargetAtTime(freq, now, 0.18);
+    this.melodyGain.gain.setTargetAtTime(0.15 * this.currentIntensity, now, 0.2);
+    this.melodyGain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
 
-    this.arpIndex++;
+    this.melodyIndex++;
   }
 
   private updateVoicesToCurrentChord() {
@@ -248,11 +246,11 @@ export class AudioEngine {
     const now = this.ctx.currentTime;
     const chord = this.currentChords[this.currentChordIdx] || "Cmaj";
 
-    // Arp notes (octave 4 + 5 for range)
+    // Melody notes (octave 4 + 5 for range)
     const o4 = chordToFreqs(chord, 4);
     const o5 = chordToFreqs(chord, 5);
-    this.arpNotes = [...o4, ...o5.slice(0, 2)];
-    this.arpIndex = 0;
+    this.melodyNotes = [...o4, ...o5.slice(0, 2)];
+    this.melodyIndex = 0;
 
     // Bass: root at octave 3
     const bass = rootFreq(chord, 3);
@@ -274,20 +272,19 @@ export class AudioEngine {
     this.currentIntensity = params.intensity;
 
     // Update tempo if changed significantly
-    if (Math.abs(params.tempo - this.currentTempo) > 3) {
+    if (Math.abs(params.tempo - this.currentTempo) > 5) {
       this.currentTempo = params.tempo;
-      this.scheduleArp();
+      this.scheduleMelody();
       this.scheduleChordChange();
     }
 
     // Update instrument timbre
-    const arpType = this.instrumentToOscType(params.instrument, "arp");
-    if (this.arpOsc) this.arpOsc.type = arpType;
+    if (this.melodyOsc) this.melodyOsc.type = "triangle";
 
     // Update filter based on intensity
-    if (this.arpFilter) {
-      const cutoff = 600 + params.intensity * 3400;
-      this.arpFilter.frequency.setTargetAtTime(cutoff, now, 0.3);
+    if (this.melodyFilter) {
+      const cutoff = 400 + params.intensity * 2000;
+      this.melodyFilter.frequency.setTargetAtTime(cutoff, now, 1.2);
     }
 
     // Pad volume scales inversely with intensity for balance
@@ -310,21 +307,21 @@ export class AudioEngine {
       this.padFilter.frequency.setTargetAtTime(400 + params.intensity * 1200, now, 0.5);
     }
 
-    // Immediately update current chord voices
+    // Immediately update current chord voices and force sequencer reset
     this.currentChordIdx = 0;
     this.updateVoicesToCurrentChord();
+    this.scheduleChordChange(); // Reset the 8-bar timer
     this.onChordChange?.(0);
   }
 
-  private instrumentToOscType(instrument: string, voice: "arp" | "pad"): OscillatorType {
-    if (voice === "pad") return "sawtooth";
+  private instrumentToOscType(instrument: string, voice: "melody" | "pad"): OscillatorType {
+    if (voice === "pad") return "sine";
     switch (instrument) {
       case "piano": return "triangle";
-      case "synth": return "sawtooth";
+      case "synth": return "sine";
       case "bell": return "sine";
-      case "strings": return "sawtooth";
-      case "pluck": return "triangle";
-      default: return "triangle";
+      case "strings": return "triangle";
+      default: return "sine";
     }
   }
 
