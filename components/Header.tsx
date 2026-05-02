@@ -5,6 +5,9 @@ import { useCognitiveStore } from "@/lib/cognitiveStore";
 export function Header() {
   const status = useCognitiveStore((s) => s.status);
   const frame = useCognitiveStore((s) => s.frame);
+  const sessionStartTime = useCognitiveStore((s) => s.sessionStartTime);
+  const startSession = useCognitiveStore((s) => s.startSession);
+  const endSession = useCognitiveStore((s) => s.endSession);
 
   const getMoodColor = (mood?: string) => {
     switch (mood) {
@@ -40,16 +43,41 @@ export function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
-        <span className={`w-2.5 h-2.5 rounded-full ${
-          status === "connected" ? "bg-green-500" :
-          status === "connecting" ? "bg-yellow-400" : "bg-red-400"
-        }`} />
-        <span className="text-sm font-medium text-gray-600">EMOTIV EPOC X</span>
-        <div className={`px-2 py-1 rounded-md text-[10px] font-bold border ${
-          status === "connected" ? "border-green-100 bg-green-50 text-green-600" : "border-red-100 bg-red-50 text-red-600"
-        }`}>
-          {status === "connected" ? "LIVE DATA" : "OFFLINE"}
+      <div className="flex items-center gap-4">
+        {status === "connected" && (
+          <button
+            onClick={() => sessionStartTime ? endSession() : startSession()}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+              sessionStartTime
+                ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                : "bg-teal-50 text-teal-600 border border-teal-200 hover:bg-teal-100"
+            }`}
+          >
+            {sessionStartTime ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                Stop Recording
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-teal-500" />
+                Start Session
+              </>
+            )}
+          </button>
+        )}
+        
+        <div className="flex items-center gap-3 border-l pl-4 border-gray-100">
+          <span className={`w-2.5 h-2.5 rounded-full ${
+            status === "connected" ? "bg-green-500" :
+            status === "connecting" ? "bg-yellow-400" : "bg-red-400"
+          }`} />
+          <span className="text-sm font-medium text-gray-600">EMOTIV EPOC X</span>
+          <div className={`px-2 py-1 rounded-md text-[10px] font-bold border ${
+            status === "connected" ? "border-green-100 bg-green-50 text-green-600" : "border-red-100 bg-red-50 text-red-600"
+          }`}>
+            {status === "connected" ? "LIVE DATA" : "OFFLINE"}
+          </div>
         </div>
       </div>
     </header>
