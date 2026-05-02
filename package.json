@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently -n WS,WEB -c magenta,cyan -k \"npm:dev:ws\" \"npm:dev:web\"",
     "dev:web": "next dev -p 3939",
-    "dev:ws": "WS_PORT=3940 tsx watch server/ws.ts",
+    "dev:ws": "tsx watch server/ws.ts",
     "build": "next build",
     "start": "next start"
   },
