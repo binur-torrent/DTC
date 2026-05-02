@@ -44,7 +44,13 @@ export class DatasetPlayback {
       })
     );
 
-    const rows: PlaybackFrame[] = [];
+    const rawRows: any[] = [];
+    let minA = Infinity, maxA = -Infinity;
+    let minB = Infinity, maxB = -Infinity;
+    let minT = Infinity, maxT = -Infinity;
+    let minG = Infinity, maxG = -Infinity;
+    let minD = Infinity, maxD = -Infinity;
+    let minF = Infinity, maxF = -Infinity;
 
     for await (const row of parser) {
       const alpha = parseFloat(row.mean_2_a) || 0;
@@ -55,19 +61,37 @@ export class DatasetPlayback {
 
       const fft: number[] = [];
       for (let i = 0; i < 64; i++) {
-        fft.push(Math.abs(parseFloat(row[`fft_${i}_a`])) || 0);
+        const val = Math.abs(parseFloat(row[`fft_${i}_a`])) || 0;
+        fft.push(val);
+        if (val < minF) minF = val;
+        if (val > maxF) maxF = val;
       }
 
-      rows.push({
-        alpha: this.normalize(alpha, -50, 150),
-        beta: this.normalize(beta, -50, 150),
-        theta: this.normalize(theta, -50, 150),
-        gamma: this.normalize(gamma, -50, 150),
-        delta: this.normalize(delta, -50, 150),
-        fft: fft.map(v => this.normalize(v, 0, 1000)),
-        label: row.label,
-      });
+      if (alpha < minA) minA = alpha; if (alpha > maxA) maxA = alpha;
+      if (beta < minB) minB = beta; if (beta > maxB) maxB = beta;
+      if (theta < minT) minT = theta; if (theta > maxT) maxT = theta;
+      if (gamma < minG) minG = gamma; if (gamma > maxG) maxG = gamma;
+      if (delta < minD) minD = delta; if (delta > maxD) maxD = delta;
+
+      rawRows.push({ alpha, beta, theta, gamma, delta, fft, label: row.label });
     }
+
+    if (minA === Infinity) minA = -50; if (maxA === -Infinity) maxA = 150;
+    if (minB === Infinity) minB = -50; if (maxB === -Infinity) maxB = 150;
+    if (minT === Infinity) minT = -50; if (maxT === -Infinity) maxT = 150;
+    if (minG === Infinity) minG = -50; if (maxG === -Infinity) maxG = 150;
+    if (minD === Infinity) minD = -50; if (maxD === -Infinity) maxD = 150;
+    if (minF === Infinity) minF = 0; if (maxF === -Infinity) maxF = 1000;
+
+    const rows: PlaybackFrame[] = rawRows.map(r => ({
+      alpha: this.normalize(r.alpha, minA, maxA),
+      beta: this.normalize(r.beta, minB, maxB),
+      theta: this.normalize(r.theta, minT, maxT),
+      gamma: this.normalize(r.gamma, minG, maxG),
+      delta: this.normalize(r.delta, minD, maxD),
+      fft: r.fft.map((v: number) => this.normalize(v, minF, maxF)),
+      label: r.label,
+    }));
 
     this.data = rows;
     this.isLoaded = true;
