@@ -33,14 +33,26 @@ setInterval(() => {
       let alpha = frame.alpha;
       let beta = frame.beta;
       let theta = frame.theta;
+      let phase: any;
       
-      if (frame.label === "NEGATIVE") {
-        beta = Math.min(1, beta * 2.5); // High stress
-        alpha = Math.max(0, alpha * 0.2); // Low calm
-      } else if (frame.label === "POSITIVE") {
-        theta = Math.min(1, theta * 2.0); // High focus
-        beta = Math.max(0, beta * 0.4); // Low stress
-        alpha = Math.min(1, alpha * 1.5); // High calm
+      if (frame.label === "POSITIVE") {
+        // High energy, bright, focused
+        beta = Math.min(1, beta * 1.8); 
+        alpha = Math.min(1, alpha * 2.0); 
+        theta = Math.max(0, theta * 0.5); 
+        phase = "deep_focus";
+      } else if (frame.label === "NEGATIVE") {
+        // Tense, stressful, chaotic
+        beta = Math.min(1, beta * 2.5); 
+        alpha = Math.max(0, alpha * 0.1); 
+        theta = Math.min(1, theta * 2.0); 
+        phase = "overload";
+      } else {
+        // NEUTRAL - stable baseline
+        alpha = 0.5;
+        beta = 0.3;
+        theta = 0.4;
+        phase = "calm";
       }
 
       bands = {
@@ -50,7 +62,7 @@ setInterval(() => {
         gamma: frame.gamma,
         delta: frame.delta,
         fft: frame.fft,
-        phase: frame.label === "NEGATIVE" ? "overload" : "calm"
+        phase
       };
       label = frame.label;
     } else {

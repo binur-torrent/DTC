@@ -23,11 +23,11 @@ Musical mapping guidelines:
 - High focus → moderate tempo (70-80 BPM), clean piano/bell, steady but soft, medium intensity
 - High stress / overloaded → slow tempo, minor scale, slightly thicker synth textures, tense but soulful chords
 - Drifting → very slow, pentatonic, floating bells, very low intensity
-- POSITIVE emotion label → brighter keys (C, G, D major), uplifting soulful progressions
-- NEGATIVE emotion label → darker keys (Am, Em, Dm), sentimental minor progressions
-- NEUTRAL → balanced, dreamy dorian or mixolydian modes
+- POSITIVE emotion label → BRIGHT and UPLIFTING. High tempo (80-100 BPM), bright keys (C, G, D major), clean piano or bells, light textures.
+- NEGATIVE emotion label → DARK and TENSE. Slow tempo (40-60 BPM), darker keys (Am, Dm, Bm), sentimental strings or distorted synths, minor or dissonant chords.
+- NEUTRAL emotion label → BALANCED and DREAMY. Moderate tempo (65-75 BPM), dorian or mixolydian modes, soft pads, steady atmosphere.
 
-Always favor lush, evolving chords (maj7, min7, 9ths). Avoid anything rhythmic, fast, or "crazy".`;
+Always favor lush, evolving chords (maj7, min7, 9ths). Avoid anything rhythmic, fast, or "crazy". Make POSITIVE vs NEGATIVE contrast very obvious.`;
 
 // Fallback presets keyed by mood — used when API key is missing or call fails
 const FALLBACK: Record<Mood, MusicParams> = {
@@ -37,19 +37,19 @@ const FALLBACK: Record<Mood, MusicParams> = {
     description: "Deeply calm major textures, breathing and slow",
   },
   focused: {
-    key: "D", scale: "dorian", chords: ["Dm9", "G13", "Cmaj7", "Am7"],
-    tempo: 75, instrument: "piano", intensity: 0.45,
-    description: "Clean, steady focus with soulful dorian textures",
+    key: "D", scale: "major", chords: ["Dmaj9", "Gmaj7", "A7", "Bm7"],
+    tempo: 85, instrument: "piano", intensity: 0.6,
+    description: "Uplifting and bright focus, productive energy",
   },
   engaged: {
     key: "G", scale: "mixolydian", chords: ["Gmaj9", "Fmaj7", "Am7", "Cmaj7"],
-    tempo: 82, instrument: "synth", intensity: 0.5,
-    description: "Warm mixolydian clouds, active but grounded",
+    tempo: 72, instrument: "synth", intensity: 0.4,
+    description: "Balanced neutral atmosphere, dreamy and stable",
   },
   overloaded: {
     key: "Am", scale: "minor", chords: ["Am9", "Dm7", "E7alt", "Fmaj7"],
-    tempo: 65, instrument: "strings", intensity: 0.7,
-    description: "Heavy minor clouds, slow and sentimental",
+    tempo: 50, instrument: "strings", intensity: 0.8,
+    description: "Heavy minor tension, slow and emotionally weighted",
   },
   drifting: {
     key: "Em", scale: "pentatonic", chords: ["Em9", "Am7", "Cmaj7", "Bm7"],
